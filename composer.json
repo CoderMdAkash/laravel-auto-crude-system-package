@@ -1,0 +1,26 @@
+{
+    "name": "mdakashmia/laravel-auto-crude",
+    "description": "Laravel Simple Auto Crude Generator",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Akash\\LaravelAutoCrude\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "mdakashmia",
+            "email": "akash904069@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Akash\\LaravelAutoCrude\\AutoCrudeServiceProvider"
+            ]
+        }
+    }
+}
