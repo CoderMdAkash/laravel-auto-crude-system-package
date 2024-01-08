@@ -1,7 +1,12 @@
 {
     "name": "mdakashmia/laravel-auto-crude",
     "description": "Laravel Simple Auto Crude Generator",
-    "type": "composer-plugin",
+    "keywords": [
+        "laravel_auto_crude_generate",
+        "laravel",
+        "laravel-auto-crude-generate"
+    ],
+    "homepage": "https://github.com/CoderMdAkash/laravel-auto-crude-system-package",
     "license": "MIT",
     "autoload": {
         "psr-4": {
