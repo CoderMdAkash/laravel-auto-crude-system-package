@@ -1,0 +1,189 @@
+meta:
+  name: My App CRUD
+  version: 1.0
+  namespace: App          # base PHP namespace for generated classes
+  base_path: app          # where models/controllers live
+  ui:
+    admin_path: resources/views/admin
+    tailwind: true
+
+models:
+  # ---------- One block per model ----------
+  - name: Post                 # Studly model name
+    table: posts               # DB table
+    timestamps: true
+    soft_deletes: true
+    fillable: [title, slug, body, status, published_at, user_id]
+    guarded: []                # optional
+    casts:
+      published_at: datetime
+    observers:
+      - sluggable:title->slug  # custom hooks your generator knows
+    index:
+      - ["slug", "unique"]
+      - ["status"]
+    factory: true
+    seeder:
+      count: 20
+
+    fields:
+      - name: id
+        type: id               # special: increments big integer
+        db:
+          primary: true
+
+      - name: title
+        type: string
+        db:
+          length: 200
+          unique: true
+        validation: "required|string|min:3|max:200"
+        form:
+          input: text
+          label: "Title"
+          placeholder: "e.g. A perfect day"
+        table:
+          searchable: true
+          sortable: true
+
+      - name: slug
+        type: string
+        db:
+          length: 220
+          unique: true
+        validation: "required|string|max:220"
+        form:
+          input: text
+          disabled: true
+        table:
+          badge: true
+
+      - name: body
+        type: text
+        validation: "required|string|min:10"
+        form:
+          input: textarea
+          rows: 8
+
+      - name: status
+        type: enum
+        db:
+          values: [draft, review, published, archived]
+          default: draft
+        validation: "required|in:draft,review,published,archived"
+        form:
+          input: select
+          options:
+            draft: Draft
+            review: In Review
+            published: Published
+            archived: Archived
+        table:
+          badge_colors:          # optional UI mapping your generator can use
+            draft: gray
+            review: yellow
+            published: green
+            archived: slate
+
+      - name: published_at
+        type: datetime
+        nullable: true
+        validation: "nullable|date"
+        form:
+          input: datetime
+
+      - name: user_id
+        type: foreignId
+        db:
+          references: id
+          on: users
+          onDelete: cascade
+        validation: "required|exists:users,id"
+        form:
+          input: select
+          source: users:name,id  # how to populate options
+
+    relationships:
+      - type: belongsTo
+        name: author
+        model: User
+        foreign_key: user_id
+        inverse: hasMany:posts
+
+      - type: hasMany
+        name: comments
+        model: Comment
+        foreign_key: post_id
+
+    route:
+      prefix: admin
+      path: posts
+      name: admin.posts
+      middleware: ["web","auth","can:manage-posts"]
+      api: true                 # also expose apiResource
+
+    policy:
+      name: PostPolicy
+      abilities:
+        viewAny: "role:admin,editor"
+        view: "owns:user_id|role:admin,editor"
+        create: "role:admin,editor"
+        update: "owns:user_id|role:admin,editor"
+        delete: "role:admin"
+        restore: "role:admin"
+        forceDelete: "role:admin"
+
+    ui:
+      table:
+        columns: [id, title, status, published_at, author.name]
+        default_sort: "-id"
+        per_page: 15
+        actions: [show, edit, delete]
+      form:
+        sections:
+          - title: "Main"
+            fields: [title, slug, body]
+          - title: "Meta"
+            fields: [status, published_at, user_id]
+
+  - name: Comment
+    table: comments
+    timestamps: true
+    soft_deletes: false
+    fillable: [post_id, user_id, body, is_approved]
+    fields:
+      - { name: id, type: id, db: { primary: true } }
+      - name: post_id
+        type: foreignId
+        db: { references: id, on: posts, onDelete: cascade }
+        validation: "required|exists:posts,id"
+      - name: user_id
+        type: foreignId
+        db: { references: id, on: users, onDelete: cascade }
+        validation: "required|exists:users,id"
+      - name: body
+        type: text
+        validation: "required|string|min:2"
+        form: { input: textarea, rows: 4 }
+      - name: is_approved
+        type: boolean
+        db: { default: false }
+        validation: "boolean"
+        form: { input: switch }
+    relationships:
+      - { type: belongsTo, name: post, model: Post, foreign_key: post_id }
+      - { type: belongsTo, name: author, model: User, foreign_key: user_id }
+    route:
+      prefix: admin
+      path: comments
+      name: admin.comments
+      middleware: ["web","auth","can:moderate-comments"]
+    ui:
+      table:
+        columns: [id, post.title, author.name, is_approved, created_at]
+        default_sort: "-created_at"
+        per_page: 20
+        actions: [edit, delete]
+permissions:
+  - manage-posts
+  - moderate-comments
