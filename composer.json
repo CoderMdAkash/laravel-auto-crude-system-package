@@ -2,9 +2,15 @@
     "name": "mdakashmia/laravel-auto-crude",
     "description": "Laravel Simple Auto Crude Generator",
     "keywords": [
-        "laravel_auto_crude_generate",
         "laravel",
-        "laravel-auto-crude-generate"
+        "Laravel",
+        "CodeGenerator",
+        "AutoCRUD",
+        "CRUDGenerator",
+        "ScaffoldGenerator",
+        "DynamicForms",
+        "DeveloperTools",
+        "OpenSource"
     ],
     "homepage": "https://github.com/CoderMdAkash/laravel-auto-crude-system-package",
     "license": "MIT",
